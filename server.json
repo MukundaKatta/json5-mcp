@@ -1,0 +1,21 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.MukundaKatta/json5",
+  "description": "MCP server: parse and stringify JSON5 \u2014 relaxed JSON with comments and trailing commas.",
+  "version": "0.1.1",
+  "repository": {
+    "url": "https://github.com/MukundaKatta/json5-mcp",
+    "source": "github"
+  },
+  "websiteUrl": "https://github.com/MukundaKatta/json5-mcp",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@mukundakatta/json5-mcp",
+      "version": "0.1.1",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
