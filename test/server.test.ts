@@ -40,3 +40,17 @@ test('round-trips JSON values', () => {
 test('also parses plain JSON', () => {
   assert.deepEqual(parse('{"a": 1}'), { a: 1 });
 });
+
+test('stringify respects the indent argument', () => {
+  assert.equal(stringify({ a: 1 }, 0), "{a:1}");
+  assert.match(stringify({ a: 1 }, 2) ?? '', /^\{\n {2}a: 1,?\n\}$/);
+});
+
+test('stringify returns undefined for non-representable values', () => {
+  // JSON5.stringify yields undefined for undefined, functions, and symbols.
+  assert.equal(stringify(undefined), undefined);
+  assert.equal(
+    stringify(() => {}),
+    undefined,
+  );
+});

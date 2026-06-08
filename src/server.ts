@@ -7,6 +7,8 @@
  * Backed by the `json5` reference implementation.
  */
 
+import { createRequire } from 'node:module';
+
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -15,13 +17,16 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import JSON5 from 'json5';
 
-const VERSION = '0.1.0';
+// Single source of truth: read the version from package.json so it never drifts.
+// This resolves from both src/server.ts (tsx) and dist/server.js (node).
+const require = createRequire(import.meta.url);
+const { version: VERSION } = require('../package.json') as { version: string };
 
 export function parse(text: string): unknown {
   return JSON5.parse(text);
 }
 
-export function stringify(value: unknown, indent: number = 2): string {
+export function stringify(value: unknown, indent: number = 2): string | undefined {
   return JSON5.stringify(value, undefined, indent);
 }
 
@@ -63,7 +68,14 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
     }
     if (name === 'stringify') {
       const a = args as unknown as { value: unknown; indent?: number };
-      return textResult(stringify(a.value, a.indent ?? 2));
+      const out = stringify(a.value, a.indent ?? 2);
+      // JSON5.stringify returns undefined for values with no JSON representation
+      // (undefined, functions, symbols). Surface a clean tool error instead of
+      // emitting an undefined text field, which violates the MCP content schema.
+      if (out === undefined) {
+        return errorResult('stringify failed: value has no JSON5 representation');
+      }
+      return textResult(out);
     }
     return errorResult('unknown tool: ' + name);
   } catch (err) {
